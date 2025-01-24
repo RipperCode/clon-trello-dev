@@ -1,0 +1,62 @@
+:root {
+  --primary-100: #8046a7;
+  --primary-100-hover:#8046a773;
+  --primary-200: #9963bd;
+  --primary-300: #b087cc;
+  --accent-100: #ba68c8;
+  --accent-200: #ba68c8;
+  --accent-300: #ba68c8;
+  --background-100: #1f1028;
+  --background-100-hover:#2d173a7d;
+  --background-200: #2d173a;
+  --background-300: #3b1f4c;
+  --text-100: #fcfbfd;
+  --text-200: #efeaf5;
+  --text-300: #e3d9ec;
+  --text-300-hover:#e3d9ec40;
+}
+
+*,
+::before,
+::after{
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+  font-size: 16px;
+  
+}
+
+#app{
+  display: grid;
+  grid-template-columns: 20% 80%;
+  grid-template-rows: 6vh 94vh;
+  grid-template-areas: "header header"
+                        "aside main" ;
+  header-component{
+    grid-area: header;
+    z-index: 100;
+  }
+  aside-component{
+    grid-area: aside;
+    z-index: 50;
+  }
+  .tables{
+    grid-area:main;
+    position: relative;
+    z-index: 0;
+    overflow: auto;
+    scroll-behavior: smooth;
+  }
+  table-component{
+    display: block;
+    min-width: 100%;
+    min-height: 100%;
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    
+  }
+}
+
+/* */
