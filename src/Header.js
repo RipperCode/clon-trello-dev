@@ -1,4 +1,5 @@
 import ButtonSolid from './ButtonSolid.js'
+
 const template = document.createElement('template')
 template.innerHTML = `
 	<style>
@@ -16,14 +17,14 @@ template.innerHTML = `
 			  	width: 100%;
 			  	height: 100%;
 			  	color: var(--text-300);
-			  	background-image: url('/titleIcon.gif');
+			  	background-image: url('/clon-trello-app/titleIcon.gif');
 			  	background-size: contain;
 			  	background-repeat: no-repeat;
 			  	background-position: center;
 			}
 
 		&::after{
-			background-image: url('/titleIconAnimated.gif');
+			background-image: url('/clon-trello-app/titleIconAnimated.gif');
 			opacity: 0;
 			
 		}
@@ -130,7 +131,7 @@ template.innerHTML = `
 			<ul>
 				<li>
 					Recientes
-					<img src="/src/icons/small-down.svg" alt="dropdown Icon">
+					<img src="/clon-trello-app/icons/small-down.svg" alt="dropdown Icon">
 					<div class="dropdown">
 						<a href="">reciente 1</a>
 						<a href="">reciente 2</a>
@@ -138,7 +139,7 @@ template.innerHTML = `
 				</li>
 				<li>
 					Marcado
-					<img src="/src/icons/small-down.svg" alt="dropdown Icon">
+					<img src="/clon-trello-app/icons/small-down.svg" alt="dropdown Icon">
 					<div class="dropdown">
 						<a href="">marca 1</a>
 						<a href="">marca 2</a>

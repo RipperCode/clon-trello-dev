@@ -78,7 +78,7 @@ template.innerHTML = `
   				<div class="add">
 					 mis tableros
 					<div class="addButon">
-						<img src="/src/icons/plus.svg" alt="boton de add">
+						<img src="/clon-trello-app/icons/plus.svg" alt="boton de add">
 					</div>					
   				</div>
   				<main>

@@ -93,7 +93,7 @@ export default class Table extends HTMLElement{
             <table-header name='${this.name}'></table-header>
             <main>
                 <button class="addListButton">
-                    <img src="/src/icons/plus.svg" alt="boton de add">
+                    <img src="/clon-trello-app/icons/plus.svg" alt="boton de add">
                     new list
                     <new-list-form></new-list-form>
                 </button>  
