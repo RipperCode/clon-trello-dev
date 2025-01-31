@@ -1,0 +1,52 @@
+{
+  "tables": [
+    {
+      "id": "perro",
+      "color": "brown",
+      "lists": [],
+      "favorite": false
+    },
+    {
+      "id": "green",
+      "color": "loro",
+      "lists": [],
+      "favorite": false
+    },
+    {
+      "id": "paloma",
+      "color": "white",
+      "lists": [],
+      "favorite": false
+    },
+    {
+      "id": "perro",
+      "color": "#ab8b0b",
+      "lists": [],
+      "favorite": false
+    },
+    {
+      "id": "iguana",
+      "color": "#43c22a",
+      "lists": [],
+      "favorite": false
+    },
+    {
+      "id": "cielo",
+      "color": "#28aebf",
+      "lists": [],
+      "favorite": false
+    },
+    {
+      "id": "paz",
+      "color": "#ddfbff",
+      "lists": [],
+      "favorite": false
+    },
+    {
+      "id": "adasd asdasd asdasd",
+      "color": "white",
+      "lists": [],
+      "favorite": false
+    }
+  ]
+}

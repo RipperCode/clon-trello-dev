@@ -43,6 +43,14 @@ export default class ButtonSolid extends HTMLElement{
   		}
   		
   	}
+  	disabled(){
+  		this.shadowRoot.querySelector('button')
+  			.setAttribute('disabled', '')
+  	}
+  	removeDisabled(){
+  		this.shadowRoot.querySelector('button')
+  			.removeAttribute('disabled')
+  	}
 }
 
 customElements.define("button-solid", ButtonSolid);

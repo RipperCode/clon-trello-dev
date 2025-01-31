@@ -1,67 +1,77 @@
  console.log('main.js cargado')
- import Header from './Header.js'
  import asideComponent from './Aside.js'
+ import Header from './Header.js'
  import Table from './Table.js'
  import AsideNewTable from './AsideNewTable.js'
+ const $table = document.querySelector('table-component')
  document.addEventListener('DOMContentLoaded', () => {
-    const table = document.querySelector('.tables');
-    const newTable = new Table('Perro', 'pink')
-    fetch('/src/data.json')
-        .then(res => res.json())
-        .then(data => console.log(data))
-    const routes = {
-        '/': newTable
-    };
-
-    function navigateTo(path) {
-    	
-        const content = routes[path] || routes['/'];
-        if(table.children.length === 0){
-            table.append(content)
-        }else {
-            table.removeChild(table.children[0])
-            table.append(content)
-        }
-        window.history.pushState({ path }, '', path);
-    }
-
-    window.addEventListener('popstate', event => {
-    	console.log(event.state)
-        navigateTo(event.state ? event.state.path : '/');
-    });
-
-    document.addEventListener('create:table', (event) => {
+   
+   async function loadData(path){
+      if(path === '/clon-trello-app/') {
         
-        let tableName = event.detail.name;
-        let tableColor = event.detail.color;
-        const newTable = new Table(tableName, tableColor)
-        console.log(newTable)
-        routes[`/${tableName}`] = newTable
-        navigateTo(`/${tableName}`);
-       /* let tableName = event.detail.name;
-        routes[`/${tableName}`] =`<${tableName}-component name=${tableName}></${tableName}-component>`;
-        navigateTo(`/${tableName}`);
-        
-        customElements.define(`${tableName}-component`, class extends Table{
-            constructor(){
-                super()
-                this.color = event.detail.color
-            }
-        });*/
-        
+        try {
+            const response = await fetch(`http://localhost:3000/tables`);
+            const data = await response.json();
             
+            $table.setData(data, 'home'); // Pasar los datos al componente
+        } catch (error) {
+            console.error('Error loading data:', error);
+        }
+        
+      }else{
+        if(window.location.pathname.includes('/clon-trello-app/')){
+          path = window.location.pathname.split('/')[2]
+          console.log('prueba', path)
+        }
+        try {
+            const response = await fetch(`http://localhost:3000/tables/${path}`);
+            const data = await response.json();
+            $table.setData(data, 'table'); // Pasar los datos al componente
+        } catch (error) {
+            console.log('Error loading data:', error);
+            $table.setData({message:'no se encontro esta tabla'}, 'NotFound')
+        }
+      }
+      
+   }
+
+    window.addEventListener('popstate', () => {
+        loadData(window.location.pathname);
     });
-    document.addEventListener('navigateTo:table', (event)=>{
-        console.log('se activo el evento navigateTo')
+    document.addEventListener("create:table",(event)=>{
+      const data = {
+        id: event.detail.name,
+        color:event.detail.color || 'white',
+        lists:[],
+        favorite: false
+      }
+      fetch('http://localhost:3000/tables',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json'
+        },
+        body: JSON.stringify(data)
+      }).then(()=>{
+        window.history.pushState({path:`/clon-trello-app/${data.id}`}, '', `/clon-trello-app/${data.id}`)
+        loadData(data.id, 'table')
+      })
 
-        console.log(event.detail.name, event.detail.color)
-
-        console.log(routes)
-        navigateTo(`/${event.detail.name}`)
-
+      
+      
     })
-
- 
-
-    navigateTo(window.location.pathname);
+    document.addEventListener("navigateTo:table",(event)=>{
+      console.log('navegar a', event.detail.name)
+      const currentTable = window.location.pathname.split('/')[2] ?? '/clon-trello-app/'
+      if(currentTable != event.detail.name){
+        window.history.pushState({path:`/clon-trello-app/${event.detail.name}`}, '', `/clon-trello-app/${event.detail.name}`)
+        loadData(event.detail.name)
+      }
+      
+    })
+    document.addEventListener('home',  (event)=>{
+      window.history.pushState({path:'/clon-trello-app/'}, '', '/clon-trello-app/' )
+      loadData('/clon-trello-app/')
+    })
+    
+    loadData(window.location.pathname);
 });

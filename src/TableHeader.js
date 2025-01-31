@@ -34,7 +34,7 @@ export default class TableHeader extends HTMLElement{
 	  			height:8vh;
 	  			background: #ffffff3b;
 				color: var(--background-100);
-				font-weight: 800;
+				font-weight: 600;
 				font-size: 1.2rem;
 				backdrop-filter: blur(10px);
 				border-bottom: 1px solid rgba(255,255,255,1);

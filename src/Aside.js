@@ -23,7 +23,7 @@ template.innerHTML = `
 					border-bottom: 1px solid var(--text-300-hover);
 					border-top: 1px solid var(--text-300-hover);
 					width: 100%;
-					height:40px;
+					height: 7%;
 
 					div{
 						
@@ -48,8 +48,13 @@ template.innerHTML = `
 				}
 
 				main{
-					display: block;
+					position:absolute;
 					
+					left:0;
+					width:100%;
+					min-height:93%;
+					max-height: 93%;
+					overflow-y:auto;
 					.tableItems{
 						display: flex;
 						justify-content: center;
@@ -58,10 +63,13 @@ template.innerHTML = `
 						background-color: var(--background-300);
 						transition: background-color 0.2s ease-in-out;
 						p{	
+							display:flex;
+							align-items:center;
 							overflow-wrap:break-word;
 							width: 100%;
-							height: 80%;
-							margin: 5%;
+							height: 100%;
+							text-indent: 10px;
+							cursor:pointer;
 						}
 						&:hover{
 							background-color: var(--text-300-hover);
@@ -96,12 +104,22 @@ export default class asideComponent extends HTMLElement{
   			bubbles:true,
   			composed:true
   		})
-	
-
-
 	constructor(){
 		super()
 		this.attachShadow({ mode: "open" });
+	}
+	handleEvent(event){
+		if(event.type === "click"){
+			if(event.target.matches('.tableItems p')){
+				console.log('dentro del handleEvent')
+				const navigateTo = new CustomEvent('navigateTo:table',{
+  				detail:{name: event.target.textContent},
+  				bubbles:true,
+  				composed:true
+  				})
+  				event.target.dispatchEvent(navigateTo)
+			}
+		}
 	}
 	//propiedades observables
 	static get observedAttributes() {
@@ -113,9 +131,11 @@ export default class asideComponent extends HTMLElement{
   	}
   	// metodo que se ejecuta cuando se conecta el componente al DOM
   	connectedCallback() {
+
   		this.#html = template.content.cloneNode(true)
   		this.shadowRoot.append(this.#html)
   		const addbutton = this.shadowRoot.querySelector('.addButon')
+
   		addbutton.addEventListener('click', ()=>{
   			const sidenewtable = this.children[0]
   			sidenewtable.setAttribute('isVisible', '')
@@ -128,11 +148,32 @@ export default class asideComponent extends HTMLElement{
   			this.createTable(event.detail.name, event.detail.color)
 	  		
   		})
-
+  		this.shadowRoot.querySelector('main').addEventListener("click",this)
+  		this.fetchData()
   	}
+  	async fetchData(){
+  		const res = await fetch('http://localhost:3000/tables')
+  		const data = await res.json()
+  		this.data = data  		
+  		const listTable = this.shadowRoot.querySelector('main');
 
+   		//listTable.innerHTML = '';
+
+    	const fragment = document.createDocumentFragment();
+
+    	// Itera sobre los datos y crea los elementos correspondientes
+    	this.data.forEach(table => {
+	        const tableItem = document.createElement('div');
+	        tableItem.classList.add('tableItems');
+	        const tableName = document.createElement('p');
+	        tableName.textContent = table.id; // Asume que cada tabla tiene un campo 'name'
+	        tableItem.appendChild(tableName);
+	        fragment.appendChild(tableItem);
+  		})
+  		listTable.appendChild(fragment)
+  	}
   	addTable(name){
-  		const temp = document.createElement('template')
+  		
   		const listTable = this.shadowRoot.querySelector('main')
   		const table = document.createElement('div')
   		const nameTable =document.createElement('p')
@@ -140,15 +181,7 @@ export default class asideComponent extends HTMLElement{
   		table.classList.add('tableItems')
   		table.append(nameTable)
   		listTable.append(table)
-  		table.addEventListener('click',(event)=>{
-  			
-  			const navigateTo = new CustomEvent('navigateTo:table',{
-  				detail:{name: event.target.textContent},
-  				bubbles:true,
-  				composed:true
-  			})
-  			table.dispatchEvent(navigateTo)
-  		})
+  		
   	}
   			
   
@@ -158,9 +191,7 @@ export default class asideComponent extends HTMLElement{
   		
   		this.dispatchEvent(this.createTableEvent)
   	}
-  	navigate(name){
-
-  	}
+  	
 }
 
 customElements.define("aside-component", asideComponent);

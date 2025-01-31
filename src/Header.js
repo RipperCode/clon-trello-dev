@@ -10,6 +10,7 @@ template.innerHTML = `
 			padding: 0;
 		}
 		.icon{
+			cursor:pointer;
 			&::before,&::after{
 				content: '';
 			  	display: block;
@@ -173,6 +174,17 @@ export default class Header extends HTMLElement{
   	connectedCallback() {
   		this.#html = template.content.cloneNode(true);
     	this.shadowRoot.append(this.#html);
+    	const $icon = this.shadowRoot.querySelector('.icon')
+    	$icon.addEventListener('click',(event)=> {
+    		if(event.target.classList.contains('icon')){
+    			const homeEvent = new CustomEvent('home',{	
+	  				detail:{},
+	  				bubbles:true,
+	  				composed:true
+    			})
+    			$icon.dispatchEvent(homeEvent)
+    		}
+    	})
   	}
 }
 
