@@ -19,7 +19,7 @@ export default class TableHeader extends HTMLElement{
   	connectedCallback() {
   		this.name = this.getAttribute('name')
   		
-  		console.log('color y name en table-header', this.name)
+  		
   		template.innerHTML = `
   			<style>
   			*,
@@ -30,8 +30,10 @@ export default class TableHeader extends HTMLElement{
 				box-sizing: border-box;
 			}
 			header{
+				display:flex;
 	  			width:100%;
 	  			height:8vh;
+  				padding:10px;
 	  			background: #ffffff3b;
 				color: var(--background-100);
 				font-weight: 600;
@@ -44,12 +46,12 @@ export default class TableHeader extends HTMLElement{
   			</style>
   			<header>
   				<div>${this.name}</div>
+  				
   			</header>
   		`
   		const html = template.content.cloneNode(true)
-  		if(this.shadowRoot.children.length < 2){
-  			this.shadowRoot.append(html)
-  		}
+  		this.shadowRoot.append(html)
+  		
   	}
 }
 

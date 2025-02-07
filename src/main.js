@@ -1,3 +1,8 @@
+ /*lista de tareas: 
+  - mejar un formato legible para cuando el usuario coloque un nombre de mas de 1 palabra
+ - mejorar la usabilidad de las cards
+ */
+
  console.log('main.js cargado')
  import asideComponent from './Aside.js'
  import Header from './Header.js'
@@ -21,11 +26,12 @@
       }else{
         if(window.location.pathname.includes('/clon-trello-app/')){
           path = window.location.pathname.split('/')[2]
-          console.log('prueba', path)
+          
         }
         try {
-            const response = await fetch(`http://localhost:3000/tables/${path}`);
+            const response = await fetch(`http://localhost:3000/tables/${path}?_embed=lists`);
             const data = await response.json();
+
             $table.setData(data, 'table'); // Pasar los datos al componente
         } catch (error) {
             console.log('Error loading data:', error);
@@ -35,14 +41,19 @@
       
    }
 
+  
+
     window.addEventListener('popstate', () => {
         loadData(window.location.pathname);
     });
+    document.addEventListener('home',  (event)=>{
+      window.history.pushState({path:'/clon-trello-app/'}, '', '/clon-trello-app/' )
+      loadData('/clon-trello-app/')
+    })
     document.addEventListener("create:table",(event)=>{
       const data = {
         id: event.detail.name,
         color:event.detail.color || 'white',
-        lists:[],
         favorite: false
       }
       fetch('http://localhost:3000/tables',{
@@ -68,10 +79,7 @@
       }
       
     })
-    document.addEventListener('home',  (event)=>{
-      window.history.pushState({path:'/clon-trello-app/'}, '', '/clon-trello-app/' )
-      loadData('/clon-trello-app/')
-    })
+    
     
     loadData(window.location.pathname);
 });

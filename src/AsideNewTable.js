@@ -3,11 +3,11 @@ import 'vanilla-colorful/hex-alpha-color-picker.js'
 const template = document.createElement('template')
 template.innerHTML = `
 	<style>
-	*,::before,::after{
-		margin:0;
-		padding:0;
-		box-sizing: border-box;
-	}
+		*,::before,::after{
+			margin:0;
+			padding:0;
+			box-sizing: border-box;
+		}
 		:host{
 			display:none;
 			position: absolute;
@@ -46,7 +46,7 @@ template.innerHTML = `
 			
 			display:flex;
 			width:80%;
-			justify-content:space-between;
+			justify-content:space-around;
 			align-content: stretch; 
 			text-align:center;
 			margin-top:5px;
@@ -99,8 +99,6 @@ template.innerHTML = `
 			<div class="color"></div>
 			<hex-input color="#1e88e5"></hex-input>
 		</div>
-		
-		
 		<small>name is required</small>
 		<div class='bottons'>
 			<button-solid>crear</button-solid>
@@ -108,12 +106,11 @@ template.innerHTML = `
 		</div>
 	</aside>`
 export default class AsideNewTable extends HTMLElement{
-	color
-	name 
+	
 	constructor(){
 		super()
 		this.attachShadow({ mode: "open" });
-		this.color = 'white'
+		this.color = '#1e88e5'
 		this.name = undefined
 	}
 	//propiedades observables
@@ -158,7 +155,8 @@ export default class AsideNewTable extends HTMLElement{
   		
   		
   		sendButton.addEventListener('click', (event)=>{
-  			console.log(this.color)
+  			this.color = this.color || '#1e88e5'
+  			console.log('en sendButton:', this.name, this.color)
   			const sendInfo = new CustomEvent('send:tableInfo',{
 	  			detail:{color: this.color, name: this.name},
 	  			bubbles:true,
@@ -183,7 +181,7 @@ export default class AsideNewTable extends HTMLElement{
 		picker.addEventListener('color-changed', (event) => {
 			this.shadowRoot.querySelector('.color')
 				.style.background = event.detail.value
-				this.color = event.detail.value	
+				this.color = event.detail.value
 			
 		  });
   		

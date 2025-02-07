@@ -1,3 +1,5 @@
+import Star from './Star.js'
+import OptionsTable from './OptionsTable.js'
 const template = document.createElement('template')
 template.innerHTML = `
 			<style>
@@ -57,6 +59,8 @@ template.innerHTML = `
 					overflow-y:auto;
 					.tableItems{
 						display: flex;
+						position:relative;
+						gap:5px;
 						justify-content: center;
 						align-items: center;
 						height: 40px;
@@ -65,13 +69,34 @@ template.innerHTML = `
 						p{	
 							display:flex;
 							align-items:center;
-							overflow-wrap:break-word;
+							overflow-x:hidden;
+							
+							white-space: nowrap;
+							text-overflow:fade;	
 							width: 100%;
 							height: 100%;
 							text-indent: 10px;
 							cursor:pointer;
 						}
+						img{
+							width:15px;
+							height:15px;
+							opacity:0.7;
+							
+							
+							&:hover{
+								background-color:var(--text-300-hover);
+								width:20px;
+								height:20px;
+							}
+						}
+						star-icon{
+							margin-right:10px;
+
+						}
+						
 						&:hover{
+
 							background-color: var(--text-300-hover);
 						}
 						.hidden{
@@ -80,6 +105,7 @@ template.innerHTML = `
 						
 					}
 				}
+
 			}
   			</style>
   			<aside>
@@ -109,9 +135,10 @@ export default class asideComponent extends HTMLElement{
 		this.attachShadow({ mode: "open" });
 	}
 	handleEvent(event){
+		
 		if(event.type === "click"){
 			if(event.target.matches('.tableItems p')){
-				console.log('dentro del handleEvent')
+				
 				const navigateTo = new CustomEvent('navigateTo:table',{
   				detail:{name: event.target.textContent},
   				bubbles:true,
@@ -119,10 +146,15 @@ export default class asideComponent extends HTMLElement{
   				})
   				event.target.dispatchEvent(navigateTo)
 			}
+			if(event.target.matches('.tableItems img')){
+				console.log('click en puntos suspensivos')
+				const optionsTable = document.createElement('options-table')
+				event.target.appendChild(optionsTable)
+			}
 		}
 	}
 	//propiedades observables
-	static get observedAttributes() {
+	static get observedAttributes(){
     return [];
   	}
   	//callback que se ejecuta cuando cambia una propiedades
@@ -148,6 +180,7 @@ export default class asideComponent extends HTMLElement{
   			this.createTable(event.detail.name, event.detail.color)
 	  		
   		})
+  		
   		this.shadowRoot.querySelector('main').addEventListener("click",this)
   		this.fetchData()
   	}
@@ -156,32 +189,44 @@ export default class asideComponent extends HTMLElement{
   		const data = await res.json()
   		this.data = data  		
   		const listTable = this.shadowRoot.querySelector('main');
-
-   		//listTable.innerHTML = '';
-
     	const fragment = document.createDocumentFragment();
 
-    	// Itera sobre los datos y crea los elementos correspondientes
+    	//agregar tableItems 
     	this.data.forEach(table => {
 	        const tableItem = document.createElement('div');
 	        tableItem.classList.add('tableItems');
 	        const tableName = document.createElement('p');
+	        const points = document.createElement('img')
+	        points.src = '/clon-trello-app/icons/puntos-suspensivos.svg'
+	        points.alt = 'suspensive points'
+	        const star = document.createElement('star-icon')
+	        /*const star = document.createElement('img')
+	        star.src = '/clon-trello-app/icons/star.svg'
+	        star.alt = 'favorite'*/
+
 	        tableName.textContent = table.id; // Asume que cada tabla tiene un campo 'name'
 	        tableItem.appendChild(tableName);
+	        tableItem.appendChild(points)
+	        tableItem.appendChild(star)
 	        fragment.appendChild(tableItem);
   		})
   		listTable.appendChild(fragment)
   	}
   	addTable(name){
-  		
-  		const listTable = this.shadowRoot.querySelector('main')
-  		const table = document.createElement('div')
-  		const nameTable =document.createElement('p')
-  		nameTable.textContent = name
-  		table.classList.add('tableItems')
-  		table.append(nameTable)
-  		listTable.append(table)
-  		
+  			const listTable = this.shadowRoot.querySelector('main')
+  			const tableItem = document.createElement('div');
+	        tableItem.classList.add('tableItems');
+	        const tableName = document.createElement('p');
+	        const points = document.createElement('img')
+	        points.src = '/clon-trello-app/icons/puntos-suspensivos.svg'
+	        points.alt = 'suspensive points'
+	        const star = document.createElement('star-icon')
+	        tableName.textContent = name; // Asume que cada tabla tiene un campo 'name'
+	        tableItem.appendChild(tableName);
+	        tableItem.appendChild(points)
+	        tableItem.appendChild(star)
+	        listTable.appendChild(tableItem)
+	        poinst.addEventListener('click', this)
   	}
   			
   
@@ -190,6 +235,10 @@ export default class asideComponent extends HTMLElement{
   		this.createTableEvent.detail.color = color
   		
   		this.dispatchEvent(this.createTableEvent)
+  	}
+  	async eliminarTable(name){
+
+
   	}
   	
 }

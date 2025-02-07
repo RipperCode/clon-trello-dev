@@ -1,8 +1,12 @@
 const template = document.createElement('template')
 export default class Card extends HTMLElement{
-	constructor(){
+	constructor(list, add){
 		super()
 		this.attachShadow({ mode: "open" });
+		this.add = add
+		this.list = list
+		this.name = this.textContent
+		console.log('en el contructor de add: ', this.add, this.list, this.name)
 	}
 	handleEvent(event){
 		if(event.type==="keydown"){
@@ -12,7 +16,7 @@ export default class Card extends HTMLElement{
 				p.textContent = event.target.value
 				p.classList.toggle('hidden')
 				input.classList.toggle('hidden')
-
+				this.addCard(event.target.value)
 			}
 
 		}
@@ -28,7 +32,7 @@ export default class Card extends HTMLElement{
   	}
   	// metodo que se ejecuta cuando se conecta el componente al DOM
   	connectedCallback() {
-  		if(this.shadowRoot.children.length <2){
+  			
   			template.innerHTML = `
   				<style>
   				*,::before,::after{
@@ -43,8 +47,15 @@ export default class Card extends HTMLElement{
   					width:272px;
   					height:40px;
   					background-color:var(--background-100);
-  					span{
-  						margin-right:10px;
+  					img{
+  						cursor:pointer;
+	  					margin-right:10px;
+  						border-radius:5px;
+  						opacity:0.6;
+  						&:hover{
+  							background-color:var(--text-300-hover);
+  							opacity:1;
+  						}
   					}
   					input{
   						margin-left:10px;
@@ -67,9 +78,9 @@ export default class Card extends HTMLElement{
   				
   				</style>
   				<div class="container">
-  					<p class="hidden">tittle</p>
-  					<input type="text" >
-  					<span>...</span>
+  					<p class=${this.add ? "hidden": ""}>${this.name}</p>
+  					<input type="text" class=${this.add? "": "hidden"}>
+  					<img src="/clon-trello-app/icons/puntos-suspensivos.svg" alt="supensive points">
   				</div>
   			`
   			const html = template.content.cloneNode(true)
@@ -78,7 +89,24 @@ export default class Card extends HTMLElement{
   			const input = this.shadowRoot.querySelector('input')
   			input.addEventListener('keydown',this)
   			input.focus()
-  		}
+  		
+  	}
+  	async addCard(name){
+  		try{    		
+	        await fetch(`http://localhost:3000/cards`,{
+	        	method:'POST',
+		        headers:{
+		            'Content-Type':'application/json'
+		        },
+		        body: JSON.stringify({
+		           name,
+		           listId: this.list     
+		        })
+
+	        })	       
+      	}catch(error){
+        	console.log(error)
+      	}
   	}
 }
 

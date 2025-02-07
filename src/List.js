@@ -5,8 +5,7 @@ export default class List extends HTMLElement{
 	constructor(name){
 		super()
 		this.attachShadow({ mode: "open" });
-		this.name = name
-		
+		this.name = name ?? this.getAttribute('name')
 		
 	}
 	handleEvent(event){
@@ -19,7 +18,7 @@ export default class List extends HTMLElement{
 				inputTittle.classList.toggle('hidden')
 			}
 			if(event.target.classList.contains('add-card')){
-				const card = new Card()
+				const card = new Card(this.name , true )
 				const addcard = this.shadowRoot.querySelector('.add-card')
 				addcard.insertAdjacentElement("beforebegin", card)
 			}
@@ -46,8 +45,13 @@ export default class List extends HTMLElement{
   	}
   	// metodo que se ejecuta cuando se conecta el componente al DOM
   	connectedCallback() {
-  		if(this.shadowRoot.children.length <2){
-	  		template.innerHTML = `
+  		this.getCards().then(()=>this.render())
+ 				
+  	}
+
+  	render(){
+  		console.log(this.name)
+  		template.innerHTML = `
 	  		<style>
 	  			*,::before,::after{
 	  				margin:0;
@@ -64,6 +68,7 @@ export default class List extends HTMLElement{
 	  					height:40px;
 	  					text-indent: 10px;
 	  					background-color:var(--background-100);
+	  					font-weight: 500;
 	  					p{	
 	  						display:flex;
 	  						align-items:center;
@@ -81,16 +86,20 @@ export default class List extends HTMLElement{
 	  					input.hidden{
 	  						display:none;
 	  					}
-	  					span{	
+	  					img{	
 	  						cursor:pointer;
 	  						margin-right:10px;
+  							border-radius:5px;
+  							&:hover{
+  								background-color:var(--text-300-hover);
+  							}
 	  					}
 	  					&:hover{
 	  						background-color:var(--background-300);
 	  					}
 	  				&:first-child{
 	  					border-radius: 10px 10px 0 0;
-	  					
+	  						
 	  					}
 	  				&:last-child{
 	  					border-radius: 0 0 10px 10px;
@@ -112,25 +121,27 @@ export default class List extends HTMLElement{
 	  			<div class="tittle-list">
 		  			<p class="tittle">${this.name}</p>
 		  			<input type="text" placeholder="list name" class="inputTittle hidden">
-		  			<span>...</span>
+		  			<img src="/clon-trello-app/icons/puntos-suspensivos.svg" alt="supensive points">
 	  			</div>
+	  			${this.data.map(card => `<card-component>${card.name}</card-component>`).join('')}
 	  			<p class="add-card">add card</p>
 	  		</div>`
-	  		const html =  template.content.cloneNode(true)
-	  		this.shadowRoot.append(html)
-	  		const p = this.shadowRoot.querySelector('.tittle-list p')
-	  		const input = this.shadowRoot.querySelector('.tittle-list input')
-	  		p.addEventListener('click',this)
-	  		input.addEventListener('keydown',this)
-	  		const addcard = this.shadowRoot.querySelector('.add-card')
-	  		addcard.addEventListener('click',this)
-	  		
-  		}
-
-  			
+	  	const html =  template.content.cloneNode(true)
+	  	this.shadowRoot.append(html)
+	  	const p = this.shadowRoot.querySelector('.tittle-list p')
+	  	const input = this.shadowRoot.querySelector('.tittle-list input')
+	  	p.addEventListener('click',this)
+	  	input.addEventListener('keydown',this)
+	  	const addcard = this.shadowRoot.querySelector('.add-card')
+	  	addcard.addEventListener('click',this)
   	}
-  	addList(){
+  	async getCards(){
   		
+  		//el fetch de abajo me trae las list segun el nombre
+  		const res = await fetch(`http://localhost:3000/cards?listId=${this.name}`)
+  		const data = await res.json()
+  		this.data = data
+  		console.log('en list data',this.data)
   	}
 }
 

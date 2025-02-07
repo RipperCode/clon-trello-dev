@@ -13,7 +13,21 @@ export default class Table extends HTMLElement{
         return [];
     }
     handleEvent(event){
-        
+        if(event.type === 'click'){
+           if(event.target.matches('.addList button')){
+                
+                const form = this.shadowRoot.querySelector('new-list-form')
+                form.classList.add('isVisible')
+                form.focus()
+           }
+        }
+        if(event.type === 'add:list'){
+            this.addList(event.detail.name, this.name).then(()=>{
+                this.shadowRoot.querySelector('main')
+                    .insertAdjacentElement('afterbegin', new List(event.detail.name))
+            })
+            
+        }
     }
     // Callback que se ejecuta cuando cambia una propiedad
     attributeChangedCallback(name, oldValue, newValue) {
@@ -21,14 +35,15 @@ export default class Table extends HTMLElement{
     }
 
     // Método que se ejecuta cuando se conecta el componente al DOM
-    connectedCallback() {
+    connectedCallback() {        
         
     }
     setData(data, type){
         this.data = data
         this.type = type
-        
+        this.name = data.id
         this.render()
+        console.log(this.data)
     } 
 
     render(){
@@ -41,7 +56,7 @@ export default class Table extends HTMLElement{
             this.notfound()
         }
 
-        console.log(this.shadowRoot)   
+           
     }
 
     home(){
@@ -59,9 +74,9 @@ export default class Table extends HTMLElement{
                 opacity:0.5;
                 min-width:100%;
                 min-height:94vh;
+
                 color:var(--text-300);
             }
-            
             </style>
             <article class="container">
                 <h1>Home</h1> 
@@ -80,17 +95,47 @@ export default class Table extends HTMLElement{
             }
             .container{
                 background-color: ${this.data.color};
-                
                 min-width:100%;
                 min-height:94vh;
                 color:var(--text-300);
             }
+            main{
+                display:flex;
+                gap:10px;
+                padding:10px;
+                .addList{
+                    position:relative;
+                    width:272px;
+                    button{
+                        text-align:center;
+                        width:100%;
+                        min-height:40px;
+                        background-color:var(--background-100);
+                        color:var(--text-300);
+                        border-radius:5px;
+                    }                        
+                }
+                
+                
+            }
             
             </style>
             <article class="container">
-                <h1>${this.data.id}</h1> 
+                <table-header name=${this.name}></table-header>
+                <main>
+                    ${this.data.lists.map(list => `
+                        <list-component name="${list.name}"></list-component>`).join('')}
+                   <div class="addList">
+                    <button>add list</button>
+                    <new-list-form table=${this.name}></new-list-form>
+                   </div>
+                   
+                </main> 
              </article>      
             `
+            this.shadowRoot.querySelector('.addList button')
+                .addEventListener('click',this)
+            this.shadowRoot.addEventListener('add:list', this)
     }
     notfound(){
         this.shadowRoot.innerHTML = `
@@ -116,6 +161,25 @@ export default class Table extends HTMLElement{
              </article>      
             `
     }
+    async addList(nameList, table){
+    console.log('en addList:', nameList, table)
+      try{
+        const listID = crypto.randomUUID()
+        await fetch(`http://localhost:3000/lists`,{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json'
+          },
+          body: JSON.stringify({
+            id: listID,
+            name: nameList,
+            tableId: table
+          })
+        })
+      }catch(error){
+        console.log(error)
+      }
+  }
 }   
 
 customElements.define('table-component', Table)
