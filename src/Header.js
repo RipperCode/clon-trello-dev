@@ -42,7 +42,7 @@ template.innerHTML = `
 		}
 		.container{
 			display: flex;
-			height:6vh;
+			height: 100%;
 			justify-content: space-between;
 			background-color: var(--background-100);
 			gap: 2px;
@@ -54,6 +54,9 @@ template.innerHTML = `
 			list-style: none;
 			img{
 				width: 20px;
+				align-self:center;
+				transform: rotate(-90deg);
+
 			}
 			li{
 				flex-wrap: nowrap;
@@ -65,6 +68,10 @@ template.innerHTML = `
 				cursor: pointer;
 				padding:5px;
 				color: var(--text-300);
+				&:hover img{
+					transform: rotate(0deg);
+					transition: transform 0.5s ease;	
+				}
 				&:hover{
 					background-color: var(--background-300);
 
@@ -75,7 +82,7 @@ template.innerHTML = `
 					background-color: var(--background-100);
 					width: 200px;
 					height: fit-content;
-					top: 6vh;
+					top: 100%;
 					left: 0;
 					border-radius: 0 0 5px 5px ;
 
@@ -105,6 +112,7 @@ template.innerHTML = `
 			}
 				
 		}
+
 		input{
 			height: 70%;
 			border-radius: 5px;
@@ -120,10 +128,12 @@ template.innerHTML = `
 
 		}
 		button-solid{
+			height:80%;
 			margin: auto 0;
 		}
 				
 	}
+	
 	</style>
 	<div class="container">
 		<div class="icon">

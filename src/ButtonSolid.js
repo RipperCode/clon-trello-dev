@@ -20,8 +20,8 @@ export default class ButtonSolid extends HTMLElement{
 	  			<style>
 	  				button{
 						border-radius: 5px;
-						height: 80%;
-						margin: auto 0;
+						height: 100%;
+						margin:0;
 						padding: 5px;
 						text-align: center;
 						background: linear-gradient(84deg, #57a0bf 0%, #357f9f 100%);
@@ -32,9 +32,10 @@ export default class ButtonSolid extends HTMLElement{
 							outline:1px solid var(--text-300);
 						}
 						&:active{
-							outline: 1px solid black;
+							outline: 1px solid gray;
 						}
 					}
+	  				
 	  			</style>
 	  			<button><slot></slot></button>
 	  		`

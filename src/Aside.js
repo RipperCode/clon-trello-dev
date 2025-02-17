@@ -15,7 +15,7 @@ template.innerHTML = `
 				position: relative;
 				background-color: var(--background-100);
 				color: var(--text-300);
-				height:94vh;
+				height: 100%;
 				.add{
 					display: flex;
 					justify-content: space-between;
@@ -25,7 +25,7 @@ template.innerHTML = `
 					border-bottom: 1px solid var(--text-300-hover);
 					border-top: 1px solid var(--text-300-hover);
 					width: 100%;
-					height: 7%;
+					height:40px;
 
 					div{
 						
@@ -54,9 +54,10 @@ template.innerHTML = `
 					
 					left:0;
 					width:100%;
-					min-height:93%;
-					max-height: 93%;
+					min-height:calc(100% - 40px);
+					max-height: 90%;
 					overflow-y:auto;
+					
 					.tableItems{
 						display: flex;
 						position:relative;
@@ -104,6 +105,10 @@ template.innerHTML = `
 						}
 						
 					}
+					options-table{
+						position:absolute;
+						top:20%;
+					}
 				}
 
 			}
@@ -116,7 +121,7 @@ template.innerHTML = `
 					</div>					
   				</div>
   				<main>
-
+					
   				</main>
 				<slot>default content</slot>
   			</aside>
@@ -147,10 +152,17 @@ export default class asideComponent extends HTMLElement{
   				event.target.dispatchEvent(navigateTo)
 			}
 			if(event.target.matches('.tableItems img')){
-				console.log('click en puntos suspensivos')
-				const optionsTable = document.createElement('options-table')
-				event.target.appendChild(optionsTable)
+				
+				const name = event.target.parentNode.textContent
+				const top = event.target.getBoundingClientRect().top
+				const left = event.target.getBoundingClientRect().left
+				console.log(top)
+				const optionsTable = new OptionsTable(name, top, left)
+
+				this.appendChild(optionsTable)
+				
 			}
+
 		}
 	}
 	//propiedades observables
@@ -180,7 +192,11 @@ export default class asideComponent extends HTMLElement{
   			this.createTable(event.detail.name, event.detail.color)
 	  		
   		})
-  		
+  		this.addEventListener('delete:table',(event)=>{
+  			const toDeleted = this.shadowRoot.querySelector(`[table=${event.detail.name}]`)
+  			toDeleted.remove()
+
+  		})
   		this.shadowRoot.querySelector('main').addEventListener("click",this)
   		this.fetchData()
   	}
@@ -195,14 +211,13 @@ export default class asideComponent extends HTMLElement{
     	this.data.forEach(table => {
 	        const tableItem = document.createElement('div');
 	        tableItem.classList.add('tableItems');
+	        tableItem.setAttribute('table', table.id)
 	        const tableName = document.createElement('p');
 	        const points = document.createElement('img')
 	        points.src = '/clon-trello-app/icons/puntos-suspensivos.svg'
 	        points.alt = 'suspensive points'
 	        const star = document.createElement('star-icon')
-	        /*const star = document.createElement('img')
-	        star.src = '/clon-trello-app/icons/star.svg'
-	        star.alt = 'favorite'*/
+	        
 
 	        tableName.textContent = table.id; // Asume que cada tabla tiene un campo 'name'
 	        tableItem.appendChild(tableName);
@@ -216,6 +231,7 @@ export default class asideComponent extends HTMLElement{
   			const listTable = this.shadowRoot.querySelector('main')
   			const tableItem = document.createElement('div');
 	        tableItem.classList.add('tableItems');
+	        tableItem.setAttribute('table', name)
 	        const tableName = document.createElement('p');
 	        const points = document.createElement('img')
 	        points.src = '/clon-trello-app/icons/puntos-suspensivos.svg'
@@ -226,7 +242,7 @@ export default class asideComponent extends HTMLElement{
 	        tableItem.appendChild(points)
 	        tableItem.appendChild(star)
 	        listTable.appendChild(tableItem)
-	        poinst.addEventListener('click', this)
+	        
   	}
   			
   
@@ -237,8 +253,7 @@ export default class asideComponent extends HTMLElement{
   		this.dispatchEvent(this.createTableEvent)
   	}
   	async eliminarTable(name){
-
-
+  		
   	}
   	
 }

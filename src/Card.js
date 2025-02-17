@@ -1,24 +1,38 @@
+import OptionsList from './OptionsList.js'
 const template = document.createElement('template')
 export default class Card extends HTMLElement{
-	constructor(list, add){
+	constructor(list, tableName, add){
 		super()
 		this.attachShadow({ mode: "open" });
 		this.add = add
 		this.list = list
-		this.name = this.textContent
-		console.log('en el contructor de add: ', this.add, this.list, this.name)
+		this.tableName = tableName
+		this.name = this.getAttribute('name')
+		console.log('en card',this.tableName)
 	}
 	handleEvent(event){
-		if(event.type==="keydown"){
+		if(event.type === "keydown"){
 			if(event.key === "Enter"){
 				const p = this.shadowRoot.querySelector('p')
 				const input = this.shadowRoot.querySelector('input')
 				p.textContent = event.target.value
+				this.setAttribute('name', event.target.value)
+				this.name = this.getAttribute('name')
 				p.classList.toggle('hidden')
 				input.classList.toggle('hidden')
-				this.addCard(event.target.value)
+				
+				this.addCard(event.target.value,this.tableName)
 			}
 
+		}
+		if(event.type === "click"){
+			if(event.target.matches('img')){
+				const top = event.target.offsetTop + 40
+				const left = event.target.offsetLeft
+				 
+				const optionsCard = new OptionsList('Card', this.name, top, left)
+				this.shadowRoot.querySelector('.container').appendChild(optionsCard)
+			}
 		}
 			
 	}
@@ -32,7 +46,7 @@ export default class Card extends HTMLElement{
   	}
   	// metodo que se ejecuta cuando se conecta el componente al DOM
   	connectedCallback() {
-  			
+  			console.log('this.name al crear una card', this.name)
   			template.innerHTML = `
   				<style>
   				*,::before,::after{
@@ -41,6 +55,7 @@ export default class Card extends HTMLElement{
 	  				box-sizing: border-box;
 	  			}
   				.container{
+  					position:relative;
   					display:flex;
   					justify-content:space-between;
   					align-items:center;
@@ -88,10 +103,12 @@ export default class Card extends HTMLElement{
   			this.shadowRoot.querySelector('p').addEventListener('click',this)
   			const input = this.shadowRoot.querySelector('input')
   			input.addEventListener('keydown',this)
+  			this.shadowRoot.querySelector('img').addEventListener('click', this)
   			input.focus()
   		
   	}
-  	async addCard(name){
+  	async addCard(name, tableName){
+  		console.log('dentro del addCard', this.tableName)
   		try{    		
 	        await fetch(`http://localhost:3000/cards`,{
 	        	method:'POST',
@@ -100,7 +117,8 @@ export default class Card extends HTMLElement{
 		        },
 		        body: JSON.stringify({
 		           name,
-		           listId: this.list     
+		           listId: this.list,
+		           tableId: tableName    
 		        })
 
 	        })	       

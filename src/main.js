@@ -1,7 +1,3 @@
- /*lista de tareas: 
-  - mejar un formato legible para cuando el usuario coloque un nombre de mas de 1 palabra
- - mejorar la usabilidad de las cards
- */
 
  console.log('main.js cargado')
  import asideComponent from './Aside.js'
@@ -80,6 +76,46 @@
       
     })
     
-    
+    document.addEventListener('delete:table',  event =>{
+      console.log('tabla eliminada')
+      deleteTable(event.detail.name)
+      loadData('/clon-trello-app/')
+
+    })
     loadData(window.location.pathname);
 });
+
+async function deleteTable(name){
+  const deleteURLs = [
+    fetch(`http://localhost:3000/tables/${name}`),
+    fetch(`http://localhost:3000/lists?tableId=${name}`),
+    fetch(`http://localhost:3000/cards?tableId=${name}`)
+
+  ]
+  
+  const getData = await Promise.all(deleteURLs)
+  const dataJSON = await Promise.all(getData.map(pro => pro.json()))
+  console.log(dataJSON)
+
+  for(let i=0; i<dataJSON.length;i++){
+     if(i === 0){
+        fetch(`http://localhost:3000/tables/${name}`,{
+          method:'DELETE'
+        })
+     }else if(i === 1){
+       for(const list of dataJSON[1]){
+        fetch(`http://localhost:3000/lists/${list.id}`,{
+            method:'DELETE'
+          })
+       }
+     }else {
+        for(const card of dataJSON[2]){
+          fetch(`http://localhost:3000/cards/${card.id}`,{
+            method:'DELETE'
+          })
+        }
+     }
+      
+  }
+
+}

@@ -24,12 +24,6 @@ export default class Star extends HTMLElement{
 				  transition: fill 0.3s ease; /* Transición suave para el cambio de color */
 				  cursor: pointer; /* Indica que es un elemento interactivo */
 				}
-
-				.estrella:hover{
-				  fill: yellow; /* Color amarillo al pasar el cursor o hacer clic */
-  				  width: 20px;
-				  height: 20px;
-				}
   				svg:hover{
   					background-color:var(--text-300-hover);
   				}

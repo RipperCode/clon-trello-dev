@@ -26,6 +26,10 @@
   font-size: 16px;
   
 }
+body{
+  width: 100vw;
+  height: 100vh;
+}
 @font-face {
     font-family: 'robotoregular';
     src: url('/fonts/roboto-variablefont_wdthwght-webfont.woff2') format('woff2'),
@@ -36,19 +40,24 @@
 }
 
 #app{
+  position: relative;
+  width: 100%;
+  height: 100vh;
   font-family: system-ui,sans-serif;
   display: grid;
-  grid-template-columns: 20% 80%;
-  grid-template-rows: 6vh 94vh;
+  grid-template-columns: minmax(140px, 30%) 80%;
+  grid-template-rows: 10% 90%;
   grid-template-areas: "header header"
                         "aside main" ;
+
   header-component{
     grid-area: header;
     z-index: 100;
   }
   aside-component{
     grid-area: aside;
-    
+    height: 100%;
+    max-width: 640px;
     z-index: 50;
   }
   .tables{
@@ -57,6 +66,7 @@
     z-index: 0;
     overflow: auto;
     scroll-behavior: smooth;
+
   }
   table-component{
     display: block;
@@ -71,5 +81,8 @@
 
 }
 
-
-/* */
+@media (min-height: 600px){
+  #app{
+    grid-template-rows: 6% 94%;
+  }
+}

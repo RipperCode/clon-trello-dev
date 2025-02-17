@@ -4,7 +4,7 @@ import NewListForm from './NewListForm.js'
 
  
 export default class Table extends HTMLElement{
-
+    
 	constructor(){
 		super()
 		this.attachShadow({ mode: "open" });   
@@ -15,19 +15,22 @@ export default class Table extends HTMLElement{
     handleEvent(event){
         if(event.type === 'click'){
            if(event.target.matches('.addList button')){
-                
                 const form = this.shadowRoot.querySelector('new-list-form')
                 form.classList.add('isVisible')
                 form.focus()
            }
         }
         if(event.type === 'add:list'){
+            console.log('antes de agregar la lista', this.name)
+            const list = new List(event.detail.name, this.name)
             this.addList(event.detail.name, this.name).then(()=>{
-                this.shadowRoot.querySelector('main')
-                    .insertAdjacentElement('afterbegin', new List(event.detail.name))
+                const main = this.shadowRoot.querySelector('.addList')
+                main.insertAdjacentElement('beforebegin', list)                
+              
             })
             
         }
+        
     }
     // Callback que se ejecuta cuando cambia una propiedad
     attributeChangedCallback(name, oldValue, newValue) {
@@ -71,9 +74,9 @@ export default class Table extends HTMLElement{
             }
             .container{
                 background-color: skyblue;
-                opacity:0.5;
+                
                 min-width:100%;
-                min-height:94vh;
+                min-height:100%;
 
                 color:var(--text-300);
             }
@@ -124,7 +127,8 @@ export default class Table extends HTMLElement{
                 <table-header name=${this.name}></table-header>
                 <main>
                     ${this.data.lists.map(list => `
-                        <list-component name="${list.name}"></list-component>`).join('')}
+                        <list-component name="${list.name}" table="${list.tableId}"></list-component>`).join('')
+                    }
                    <div class="addList">
                     <button>add list</button>
                     <new-list-form table=${this.name}></new-list-form>
@@ -136,6 +140,7 @@ export default class Table extends HTMLElement{
             this.shadowRoot.querySelector('.addList button')
                 .addEventListener('click',this)
             this.shadowRoot.addEventListener('add:list', this)
+            
     }
     notfound(){
         this.shadowRoot.innerHTML = `
@@ -162,19 +167,20 @@ export default class Table extends HTMLElement{
             `
     }
     async addList(nameList, table){
-    console.log('en addList:', nameList, table)
+    
       try{
-        const listID = crypto.randomUUID()
+        
         await fetch(`http://localhost:3000/lists`,{
           method:'POST',
           headers:{
             'Content-Type':'application/json'
           },
-          body: JSON.stringify({
-            id: listID,
-            name: nameList,
-            tableId: table
-          })
+          body: JSON.stringify(    
+              {
+                name: nameList,
+                tableId: table
+              }
+          )
         })
       }catch(error){
         console.log(error)
