@@ -193,7 +193,7 @@ export default class asideComponent extends HTMLElement{
 	  		
   		})
   		this.addEventListener('delete:table',(event)=>{
-  			const toDeleted = this.shadowRoot.querySelector(`[table=${event.detail.name}]`)
+  			const toDeleted = this.shadowRoot.querySelector(`div[table="${event.detail.name}"]`)
   			toDeleted.remove()
 
   		})

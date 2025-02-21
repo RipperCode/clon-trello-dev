@@ -1,4 +1,5 @@
 import OptionsList from './OptionsList.js'
+import Close from './Close.js'
 const template = document.createElement('template')
 export default class Card extends HTMLElement{
 	constructor(list, tableName, add){
@@ -8,20 +9,32 @@ export default class Card extends HTMLElement{
 		this.list = list
 		this.tableName = tableName
 		this.name = this.getAttribute('name')
-		console.log('en card',this.tableName)
+		
 	}
 	handleEvent(event){
 		if(event.type === "keydown"){
 			if(event.key === "Enter"){
 				const p = this.shadowRoot.querySelector('p')
 				const input = this.shadowRoot.querySelector('input')
+				const close = this.shadowRoot.querySelector('close-icon')
+				if (event.target.value.trim() === "") {
+					alert('no se puede dejar el nombre vacio')
+					return
+				}
+				if(this.editar){
+					this.editarCard(event.target.value, p.textContent)
+				}else{
+					this.addCard(event.target.value,this.tableName)
+				}	
+				
+				if(close) close.remove()
+				
 				p.textContent = event.target.value
 				this.setAttribute('name', event.target.value)
 				this.name = this.getAttribute('name')
 				p.classList.toggle('hidden')
 				input.classList.toggle('hidden')
-				
-				this.addCard(event.target.value,this.tableName)
+					
 			}
 
 		}
@@ -33,6 +46,18 @@ export default class Card extends HTMLElement{
 				const optionsCard = new OptionsList('Card', this.name, top, left)
 				this.shadowRoot.querySelector('.container').appendChild(optionsCard)
 			}
+			if(event.target.matches('close-icon')){
+				this.remove()
+			}
+		}
+		if(event.type === "editar:card"){
+				const p = this.shadowRoot.querySelector('p')
+				const input = this.shadowRoot.querySelector('input')
+				this.editar = true
+				p.classList.toggle('hidden')
+				input.classList.toggle('hidden')
+				input.focus()
+
 		}
 			
 	}
@@ -95,6 +120,7 @@ export default class Card extends HTMLElement{
   				<div class="container">
   					<p class=${this.add ? "hidden": ""}>${this.name}</p>
   					<input type="text" class=${this.add? "": "hidden"}>
+  					
   					<img src="/clon-trello-app/icons/puntos-suspensivos.svg" alt="supensive points">
   				</div>
   			`
@@ -104,12 +130,25 @@ export default class Card extends HTMLElement{
   			const input = this.shadowRoot.querySelector('input')
   			input.addEventListener('keydown',this)
   			this.shadowRoot.querySelector('img').addEventListener('click', this)
+  			this.addEventListener('editar:card',this)
   			input.focus()
   		
   	}
+  	closeOption(){
+  		const closeIcon = document.createElement('close-icon')
+  		closeIcon.addEventListener('click', this)
+  		const input = this.shadowRoot.querySelector('input')
+  		console.log(input)
+  		input.insertAdjacentElement('afterend', closeIcon)
+  	}
   	async addCard(name, tableName){
   		console.log('dentro del addCard', this.tableName)
-  		try{    		
+  		try{
+  			const res = await fetch(`http://localhost:3000/lists?name=${this.list}`)
+  			const data = await res.json()
+  			const [{id}] = data
+  			console.log(id)
+  			console.log(data)    		
 	        await fetch(`http://localhost:3000/cards`,{
 	        	method:'POST',
 		        headers:{
@@ -117,7 +156,7 @@ export default class Card extends HTMLElement{
 		        },
 		        body: JSON.stringify({
 		           name,
-		           listId: this.list,
+		           listId: id,
 		           tableId: tableName    
 		        })
 
@@ -125,6 +164,18 @@ export default class Card extends HTMLElement{
       	}catch(error){
         	console.log(error)
       	}
+  	}
+  	async editarCard(name, oldName){
+  		console.log(oldName, name)
+  		const card = await fetch(`http://localhost:3000/cards?name=${oldName}`)
+  		const [cardJSON] = await card.json()
+  		fetch(`http://localhost:3000/cards/${cardJSON.id}`,{
+  			method:'PATCH',
+  			headers: {
+    			'Content-Type': 'application/json'
+  			},
+  			body: JSON.stringify({ name: name})
+  		})
   	}
 }
 

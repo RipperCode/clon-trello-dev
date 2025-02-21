@@ -7,6 +7,9 @@ export default class OptionsList extends OptionsTable{
 		this.top = top
 		this.left = left 
 	}
+	handleEvent(event){
+
+	}
 	//propiedades observables
 	static get observedAttributes() {
     return [];
@@ -18,7 +21,27 @@ export default class OptionsList extends OptionsTable{
   	connectedCallback(){
   		
   		super.connectedCallback()
+  		const editarButton = this.shadowRoot.querySelector('.editar')
+  		editarButton.addEventListener('click',(event)=>{
+  			if(this.context === "Card"){
+  				console.log('editar card', this.name)
 
+	  			const editarCardEvent = new CustomEvent('editar:card',{
+	  				detail:{name:this.name},
+	  				bubbles: true,
+	  				composed: true
+	  			})
+	  			this.dispatchEvent(editarCardEvent)	
+  			}else{
+  				console.log('editar list', this.name)
+  				const editarListEvent = new CustomEvent('edit:list',{
+	  				detail:{name:this.name},
+	  				bubbles: true,
+	  				composed: true
+	  			})
+	  			this.dispatchEvent(editarListEvent) 
+  			}
+  		})
   	}
   	clickDeleteButton(){
   		

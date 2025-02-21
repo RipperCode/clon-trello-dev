@@ -4,11 +4,6 @@
       "id": "comida",
       "color": "#1e88e5",
       "favorite": false
-    },
-    {
-      "id": "animales",
-      "color": "#21e61e",
-      "favorite": false
     }
   ],
   "lists": [],

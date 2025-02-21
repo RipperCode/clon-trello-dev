@@ -20,12 +20,6 @@ export default class OptionsTable extends HTMLElement{
   	// metodo que se ejecuta cuando se conecta el componente al DOM
   	connectedCallback() {
   		this.render()
-  		const deleteTable = new CustomEvent('delete:table',
-		  		{
-		  			detail:{name: this.name},
-		  			bubbles:true,
-		  			composed:true
-		  		})
   	
   		const container = this.shadowRoot.querySelector('.container')
   		container.focus()
@@ -79,10 +73,15 @@ export default class OptionsTable extends HTMLElement{
   	}
   	clickDeleteButton(){
   		const deleteButton = this.shadowRoot.querySelector('.deleteButton')
-  		
+  		const deleteTable = new CustomEvent('delete:table',
+		  		{
+		  			detail:{name: this.name},
+		  			bubbles:true,
+		  			composed:true
+		  		})
   		deleteButton.addEventListener('click',()=>{
   			
-  			/*deleteButton.dispatchEvent(deleteTable)*/
+  			deleteButton.dispatchEvent(deleteTable)
 
   		})
   	}
