@@ -1,8 +1,8 @@
 {
   "tables": [
     {
-      "id": "comida",
-      "color": "#1e88e5",
+      "id": "lista de compras",
+      "color": "#b11ee6",
       "favorite": false
     }
   ],

@@ -7,31 +7,34 @@
  const $table = document.querySelector('table-component')
  document.addEventListener('DOMContentLoaded', () => {
    
-   async function loadData(path){
-      if(path === '/clon-trello-app/') {
+   async function loadData(state){
+      console.log(state)
+      if(state === null) {
         
         try {
             const response = await fetch(`http://localhost:3000/tables`);
             const data = await response.json();
             
             $table.setData(data, 'home'); // Pasar los datos al componente
+
         } catch (error) {
             console.error('Error loading data:', error);
         }
         
       }else{
-        if(window.location.pathname.includes('/clon-trello-app/')){
+        /*if(window.location.pathname.includes('/clon-trello-app/')){
           path = window.location.pathname.split('/')[2]
           
-        }
+        }*/
         try {
-            const response = await fetch(`http://localhost:3000/tables/${path}?_embed=lists`);
+            const response = await fetch(`http://localhost:3000/tables/${state.table}?_embed=lists`);
             const data = await response.json();
 
             $table.setData(data, 'table'); // Pasar los datos al componente
         } catch (error) {
             console.log('Error loading data:', error);
             $table.setData({message:'no se encontro esta tabla'}, 'NotFound')
+
         }
       }
       
@@ -40,11 +43,11 @@
   
 
     window.addEventListener('popstate', () => {
-        loadData(window.location.pathname);
+        loadData(window.history.state);
     });
     document.addEventListener('home',  (event)=>{
       window.history.pushState({path:'/clon-trello-app/'}, '', '/clon-trello-app/' )
-      loadData('/clon-trello-app/')
+      loadData(null)
     })
     document.addEventListener("create:table",(event)=>{
       const data = {
@@ -59,8 +62,14 @@
         },
         body: JSON.stringify(data)
       }).then(()=>{
-        window.history.pushState({path:`/clon-trello-app/${data.id}`}, '', `/clon-trello-app/${data.id}`)
-        loadData(data.id, 'table')
+        let url
+        if(data.id.trim().includes(' ')) {
+          url = data.id.split(' ').join('-')
+        }else url = data.id
+
+        console.log(url)
+        window.history.pushState({path:`/clon-trello-app/${url}`,table:data.id}, '', `/clon-trello-app/${url}`)
+        loadData(window.history.state)
       })
 
       
@@ -68,10 +77,19 @@
     })
     document.addEventListener("navigateTo:table",(event)=>{
       console.log('navegar a', event.detail.name)
-      const currentTable = window.location.pathname.split('/')[2] ?? '/clon-trello-app/'
+      const currentTable = window.history.state?.table 
       if(currentTable != event.detail.name){
-        window.history.pushState({path:`/clon-trello-app/${event.detail.name}`}, '', `/clon-trello-app/${event.detail.name}`)
-        loadData(event.detail.name)
+        let url
+        if(event.detail.name.trim().includes(' ')) {
+          url = event.detail.name.split(' ').join('-')
+        }else url = event.detail.name
+        
+        window.history.pushState({
+          path:`/clon-trello-app/${url}`,
+          table:event.detail.name},
+           '',
+          `/clon-trello-app/${url}`)
+        loadData(window.history.state)
       }
       
     })
@@ -79,11 +97,13 @@
     document.addEventListener('delete:table',  event =>{
       console.log('tabla eliminada')
       deleteTable(event.detail.name)
-      loadData('/clon-trello-app/')
-
+      loadData(null)
+      
     })
-    loadData(window.location.pathname);
+    loadData(window.history.state);
 });
+// hasta aqui termina DOMContentLoaded
+
 
 async function deleteTable(name){
   const deleteURLs = [
