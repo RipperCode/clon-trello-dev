@@ -21,7 +21,7 @@ export default class List extends HTMLElement{
 				inputTittle.classList.toggle('hidden')
 			}
 			if(event.target.classList.contains('add-card')){
-				const card = new Card(this.name , this.tableId ?? this.getAttribute('table'), true )
+				const card = new Card(this.name , this.tableId, true )
 				const addcard = this.shadowRoot.querySelector('.add-card')
 				addcard.insertAdjacentElement("beforebegin", card)
 				card.closeOption()
@@ -29,7 +29,7 @@ export default class List extends HTMLElement{
 			if(event.target.matches('.tittle-list img')){
 				const top = event.target.offsetTop  + 40
 				const left = event.target.offsetLeft
-				console.log('top:' ,top,'left: ', left ) 
+				
 				const options = new OptionsList('list',this.name, top, left)
 				
 				this.shadowRoot.querySelector('.container').appendChild(options)
@@ -84,7 +84,7 @@ export default class List extends HTMLElement{
 
   	render(){
   		const table = this.getAttribute('table')
-  		console.log('table name antes de renderizar list', table)
+  		
   		template.innerHTML = `
 	  		<style>
 	  			*,::before,::after{
@@ -188,14 +188,14 @@ export default class List extends HTMLElement{
   		
   		const [{cards}] = data
   		this.data = cards
-  		console.log('en list data',this.data)
+  		
 
   	}
   	async deleteCard(name){
-  		console.log(name)
+  		
   		const getCard = await fetch(`http://localhost:3000/cards?name=${name}`)
   		const getCardJSON = await getCard.json()
-  		console.log(getCardJSON)
+  		
   		const [{id}] = getCardJSON
 
   		await fetch(`http://localhost:3000/cards/${id}`,{
@@ -207,9 +207,10 @@ export default class List extends HTMLElement{
   	}
 
   	async deleteList(name){
+  		
   		const getCard = await fetch(`http://localhost:3000/lists?name=${name}&_embed=cards`)
   		const [{cards, id}] = await getCard.json()
-  		console.log(cards, id)
+  		
   		const cardsToDelete = cards.map(card => fetch(`http://localhost:3000/cards/${card.id}`,{method:'DELETE'}))
   		await Promise.all(cardsToDelete)
  

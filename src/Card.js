@@ -42,7 +42,7 @@ export default class Card extends HTMLElement{
 			if(event.target.matches('img')){
 				const top = event.target.offsetTop + 40
 				const left = event.target.offsetLeft
-				 
+				//const position = this.getBoundingClientRect() 
 				const optionsCard = new OptionsList('Card', this.name, top, left)
 				this.shadowRoot.querySelector('.container').appendChild(optionsCard)
 			}
@@ -71,7 +71,7 @@ export default class Card extends HTMLElement{
   	}
   	// metodo que se ejecuta cuando se conecta el componente al DOM
   	connectedCallback() {
-  			console.log('this.name al crear una card', this.name)
+  			
   			template.innerHTML = `
   				<style>
   				*,::before,::after{
@@ -138,17 +138,16 @@ export default class Card extends HTMLElement{
   		const closeIcon = document.createElement('close-icon')
   		closeIcon.addEventListener('click', this)
   		const input = this.shadowRoot.querySelector('input')
-  		console.log(input)
+  		
   		input.insertAdjacentElement('afterend', closeIcon)
   	}
-  	async addCard(name, tableName){
-  		console.log('dentro del addCard', this.tableName)
+  	async addCard(name, tableId){
+  		
   		try{
   			const res = await fetch(`http://localhost:3000/lists?name=${this.list}`)
   			const data = await res.json()
   			const [{id}] = data
-  			console.log(id)
-  			console.log(data)    		
+  			   		
 	        await fetch(`http://localhost:3000/cards`,{
 	        	method:'POST',
 		        headers:{
@@ -157,16 +156,16 @@ export default class Card extends HTMLElement{
 		        body: JSON.stringify({
 		           name,
 		           listId: id,
-		           tableId: tableName    
+		           tableId
 		        })
 
 	        })	       
       	}catch(error){
-        	console.log(error)
+        	
       	}
   	}
   	async editarCard(name, oldName){
-  		console.log(oldName, name)
+  		
   		const card = await fetch(`http://localhost:3000/cards?name=${oldName}`)
   		const [cardJSON] = await card.json()
   		fetch(`http://localhost:3000/cards/${cardJSON.id}`,{

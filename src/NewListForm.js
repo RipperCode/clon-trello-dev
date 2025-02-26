@@ -93,7 +93,7 @@ export default class NewListForm extends HTMLElement{
 	 			return
   			}	
 	 		if(event.target.classList.contains('addList')){
-	 			console.log(this.name, this.table)
+	 			
 	 			const add = new CustomEvent('add:list',{
 			  		detail:{name: this.name, table: this.table},
 				  	bubbles:true,

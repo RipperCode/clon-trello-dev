@@ -97,11 +97,11 @@ template.innerHTML = `
 		<div class="colorPicker">
 			<hex-alpha-color-picker color="#1e88e5"></hex-alpha-color-picker>	
 			<div class="color"></div>
-			<hex-input color="#1e88e5"></hex-input>
+			
 		</div>
 		<small>name is required</small>
 		<div class='bottons'>
-			<button-solid>crear</button-solid>
+			<button-solid class="send">crear</button-solid>
 			<button-solid class="cancel">cancel</button-solid>
 		</div>
 	</aside>`
@@ -110,8 +110,84 @@ export default class AsideNewTable extends HTMLElement{
 	constructor(){
 		super()
 		this.attachShadow({ mode: "open" });
-		this.color = '#1e88e5'
 		this.name = undefined
+		this.color = '#1e88e5'
+	}
+	handleEvent(event){
+		const nombreInput = this.shadowRoot.getElementById('name')
+  		const sendButton = this.shadowRoot.querySelector('button-solid')
+  		const cancelButton = this.shadowRoot.querySelector('.cancel')
+
+		if(event.type === 'click'){
+
+			if(event.target.matches('.send')){
+				console.log(this.edit, 'name: ',this.name,'oldName: ',this.oldName, 'color: ', this.color)
+				if(this.edit){
+					const updateTable = new CustomEvent('update:table',{
+						detail:{ name: this.name, color: this.color, oldName: this.oldName},
+						bubbles:true,
+						composed:true
+					})
+					this.dispatchEvent(updateTable)
+					sendButton.textContent = 'crear'
+					this.removeAttribute('isVisible')
+					nombreInput.value = ''
+					sendButton.disabled()
+					this.edit = false
+					this.oldName = null
+					return
+				}
+				const sendTableInfo = new CustomEvent('send:tableInfo',{
+					detail:{ name: this.name, color: this.color},
+					bubbles:true,
+					composed:true
+				})
+				this.dispatchEvent(sendTableInfo)
+				this.removeAttribute('isVisible')
+				nombreInput.value = ''
+				sendButton.disabled()
+				return
+			}
+			if(event.target.matches('.cancel')){
+				if(this.edit){
+					this.removeAttribute('isVisible')
+					this.name = undefined
+					this.color = '#1e88e5'
+					nombreInput.value = ''
+					sendButton.disabled()
+					this.edit = false
+					return
+				}
+				this.removeAttribute('isVisible')
+				this.name = undefined
+				this.color = '#1e88e5'
+				nombreInput.value = ''
+				sendButton.disabled()
+				return
+			}
+		}
+		if(event.type === 'input'){
+			
+			if(event.target.value.trim() === ''){
+				sendButton.disabled()
+				this.shadowRoot.querySelector('small').classList.remove('hidden')
+				this.name = event.target.value	
+				return
+			}
+			this.name = event.target.value.trim()
+
+			sendButton.removeDisabled()
+			this.shadowRoot.querySelector('small').classList.add('hidden')
+			
+		}
+		if (event.type === 'change') {
+			console.log('name en change ', this.name)
+			if(event.target.value.trim() === ''){
+				alert('no se puede enviar un valor vacio')
+				return	
+			}
+			
+		}
 	}
 	//propiedades observables
 	static get observedAttributes() {
@@ -126,66 +202,47 @@ export default class AsideNewTable extends HTMLElement{
 
   		this.html = template.content.cloneNode(true)
   		this.shadowRoot.append(this.html)
-  		
-  		
+
   		const nombreInput = this.shadowRoot.getElementById('name')
   		const sendButton = this.shadowRoot.querySelector('button-solid')
   		const cancelButton = this.shadowRoot.querySelector('.cancel')
+  		const picker = this.shadowRoot.querySelector('hex-alpha-color-picker')
+  		const displayColor = this.shadowRoot.querySelector('.color')
+  		sendButton.disabled()
   		
-  		
-  		nombreInput.addEventListener('change', (event)=>{
-  			this.name = event.target.value || undefined
-  			this.name = this.name?.trim()
-  			if(this.name != undefined && this.name.length != 0){
-		  		sendButton.removeDisabled()
-  			}
-  			
-  		})
-  		nombreInput.addEventListener('input',(event)=>{
-  			const value = event.target.value?.trim()
-  			if(value && value.length != 0){
-  				this.shadowRoot.querySelector('small').classList.add('hidden')
-  			}else{
-  				this.shadowRoot.querySelector('small').classList.remove('hidden')
-  			}
-  		})
-  		if(this.name === undefined){		  	
-		  	sendButton.disabled()
-  		}
-  		
-  		
-  		sendButton.addEventListener('click', (event)=>{
-  			this.color = this.color || '#1e88e5'
-  			console.log('en sendButton:', this.name, this.color)
-  			const sendInfo = new CustomEvent('send:tableInfo',{
-	  			detail:{color: this.color, name: this.name},
-	  			bubbles:true,
-	  			composed:true
-  			})
-  			
-  			nombreInput.value = ""
-  			this.color = ""
-  			this.name = ""
-  			sendButton.dispatchEvent(sendInfo)
-  			this.removeAttribute('isVisible')
-  			sendButton.disabled()
-  		})
-  		cancelButton.addEventListener('click',()=>{
-  			this.removeAttribute('isVisible')
-  			
-  			nombreInput.value = ""
-  			this.color = ""
-  			this.name = ""
-  		})
-  		const picker = this.shadowRoot.querySelector('hex-alpha-color-picker');
-		picker.addEventListener('color-changed', (event) => {
-			this.shadowRoot.querySelector('.color')
-				.style.background = event.detail.value
-				this.color = event.detail.value
-			
-		  });
-  		
+  		nombreInput.addEventListener('input',this)
+  		nombreInput.addEventListener('change',this)
+  		sendButton.addEventListener('click',this)
+  		cancelButton.addEventListener('click',this)
+
+  		picker.addEventListener('color-changed', (event) => {
+		    
+		    if(this.name?.trim() === '') return
+		    this.color = event.detail.value;
+		    sendButton.removeDisabled()
+		    displayColor.style.backgroundColor = event.detail.value;
+		 });
   	}
+  	// name: nombre de la tabla que se editara
+  	editTable(name){
+  		const nombreInput = this.shadowRoot.getElementById('name')
+  		const sendButton = this.shadowRoot.querySelector('button-solid')
+  		this.setAttribute('isVisible','')
+  		this.edit = true
+  		this.oldName = name
+  		this.name = name
+  		nombreInput.value = name
+  		nombreInput.focus()
+  		sendButton.textContent = 'edit'
+  	}
+  	createTable(){
+  		const nombreInput = this.shadowRoot.getElementById('name')
+  		const sendButton = this.shadowRoot.querySelector('button-solid')
+  		this.edit = false
+  		nombreInput.value = ""
+  		sendButton.textContent = 'crear'
+  	}
+
 }
 
 customElements.define("aside-new-table", AsideNewTable);

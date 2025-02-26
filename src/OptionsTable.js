@@ -7,7 +7,7 @@ export default class OptionsTable extends HTMLElement{
 		this.name = name
 		this.top = top
 		this.left = left 
-
+ 
 	}
 	//propiedades observables
 	static get observedAttributes() {
@@ -69,7 +69,7 @@ export default class OptionsTable extends HTMLElement{
   		})
   		
   		this.clickDeleteButton()
-
+  		this.clickEditarButton()
   	}
   	clickDeleteButton(){
   		const deleteButton = this.shadowRoot.querySelector('.deleteButton')
@@ -85,8 +85,23 @@ export default class OptionsTable extends HTMLElement{
 
   		})
   	}
+  	clickEditarButton(){
+  		const editarButton = this.shadowRoot.querySelector('.editar')
+  		editarButton.addEventListener('click',()=>{
+  			console.log('name desde el options table: ',this.name)
+  			const editarButton = new CustomEvent('edit:table',
+		  		{
+		  			detail:{name: this.name.trim()},
+		  			bubbles:true,
+		  			composed:true
+		  		})
+  			//Dispara el evento desde el aside
+  			this.parentNode.dispatchEvent(editarButton)
+
+  		})
+  	}
   	render(){
-  		console.log('render options en table')
+  		
   		this.shadowRoot.innerHTML = `
   			<style>
 	  			*,
@@ -96,9 +111,7 @@ export default class OptionsTable extends HTMLElement{
 					padding: 0;
 					box-sizing: border-box;
 				}
-  				:host{
-  					display:block;
-  				}
+  				
   				.container{
   					display: flex;
   					flex-direction: column;

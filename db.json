@@ -1,11 +1,5 @@
 {
-  "tables": [
-    {
-      "id": "lista de compras",
-      "color": "#b11ee6",
-      "favorite": false
-    }
-  ],
+  "tables": [],
   "lists": [],
   "cards": []
 }

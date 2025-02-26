@@ -35,6 +35,10 @@ export default class ButtonSolid extends HTMLElement{
 							outline: 1px solid gray;
 						}
 					}
+	  				button[disabled]{
+	  					background: linear-gradient(84deg, #40768e 0%, #316c86 100%);
+
+	  				}
 	  				
 	  			</style>
 	  			<button><slot></slot></button>

@@ -22,9 +22,10 @@ export default class OptionsList extends OptionsTable{
   		
   		super.connectedCallback()
   		const editarButton = this.shadowRoot.querySelector('.editar')
+  		const eliminarButton = this.shadowRoot.querySelector('.deleteButton')
   		editarButton.addEventListener('click',(event)=>{
   			if(this.context === "Card"){
-  				console.log('editar card', this.name)
+  				
 
 	  			const editarCardEvent = new CustomEvent('editar:card',{
 	  				detail:{name:this.name},
@@ -33,7 +34,7 @@ export default class OptionsList extends OptionsTable{
 	  			})
 	  			this.dispatchEvent(editarCardEvent)	
   			}else{
-  				console.log('editar list', this.name)
+  				
   				const editarListEvent = new CustomEvent('edit:list',{
 	  				detail:{name:this.name},
 	  				bubbles: true,
@@ -42,31 +43,38 @@ export default class OptionsList extends OptionsTable{
 	  			this.dispatchEvent(editarListEvent) 
   			}
   		})
+  		
+
   	}
   	clickDeleteButton(){
-  		
+  		console.log(this.context)
+
   		const deleteButton = this.shadowRoot.querySelector('.deleteButton')
+  		
+  		
   		deleteButton.addEventListener('click',()=>{
-  			if(this.context === 'Card'){
-  				const deleteCardEvent = new CustomEvent('delete:card',{
-  					detail:{name: this.name},
-  					composed:true,
-  					bubbles:true
-  				})
-  				this.dispatchEvent(deleteCardEvent)
-  				
+  			if(this.context === "list"){
+	  			const deleteList = new CustomEvent('delete:list',{
+	  				detail:{name: this.name},
+	  				bubbles:true,
+	  				composed:true
+	  			})
+	  			this.dispatchEvent(deleteList)
+  				return
   			}
-  			if(this.context === 'list'){
-  				const deleteListEvent = new CustomEvent('delete:list',{
-  					detail:{name: this.name},
-  					composed:true,
-  					bubbles:true
-  				})
-  				this.dispatchEvent(deleteListEvent)
+  			if (this.context === "Card") {
+  				const deleteCard = new CustomEvent('delete:card',{
+	  				detail:{name: this.name},
+	  				bubbles:true,
+	  				composed:true
+	  			})
+	  			this.dispatchEvent(deleteCard)
+  				return
   			}
 
   		})
   	}
+  	clickEditarButton(){}
   	// metodo que se ejecuta cuando se conecta el componente al DOM
   	render(){
   		this.shadowRoot.innerHTML = `

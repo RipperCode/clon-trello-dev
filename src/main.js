@@ -1,5 +1,5 @@
 
- console.log('main.js cargado')
+console.log('main.js cargado')
  import asideComponent from './Aside.js'
  import Header from './Header.js'
  import Table from './Table.js'
@@ -27,12 +27,12 @@
           
         }*/
         try {
-            const response = await fetch(`http://localhost:3000/tables/${state.table}?_embed=lists`);
-            const data = await response.json();
-
+            const response = await fetch(`http://localhost:3000/tables?${state.table}&_embed=lists`);
+            const [data] = await response.json();
+            console.log(data)
             $table.setData(data, 'table'); // Pasar los datos al componente
         } catch (error) {
-            console.log('Error loading data:', error);
+            
             $table.setData({message:'no se encontro esta tabla'}, 'NotFound')
 
         }
@@ -51,7 +51,7 @@
     })
     document.addEventListener("create:table",(event)=>{
       const data = {
-        id: event.detail.name,
+        name: event.detail.name,
         color:event.detail.color || 'white',
         favorite: false
       }
@@ -63,12 +63,12 @@
         body: JSON.stringify(data)
       }).then(()=>{
         let url
-        if(data.id.trim().includes(' ')) {
-          url = data.id.split(' ').join('-')
-        }else url = data.id
+        if(data.name.trim().includes(' ')) {
+          url = data.name.split(' ').join('-')
+        }else url = data.name
 
-        console.log(url)
-        window.history.pushState({path:`/clon-trello-app/${url}`,table:data.id}, '', `/clon-trello-app/${url}`)
+        
+        window.history.pushState({path:`/clon-trello-app/${url}`,table:data.name}, '', `/clon-trello-app/${url}`)
         loadData(window.history.state)
       })
 
@@ -76,9 +76,10 @@
       
     })
     document.addEventListener("navigateTo:table",(event)=>{
-      console.log('navegar a', event.detail.name)
+      
       const currentTable = window.history.state?.table 
-      if(currentTable != event.detail.name){
+      if(currentTable != event.detail.name || event.detail.color){
+        
         let url
         if(event.detail.name.trim().includes(' ')) {
           url = event.detail.name.split(' ').join('-')
@@ -89,13 +90,14 @@
           table:event.detail.name},
            '',
           `/clon-trello-app/${url}`)
-        loadData(window.history.state)
+        console.log(window.history.state)
+        
       }
-      
+      loadData(window.history.state)
     })
     
     document.addEventListener('delete:table',  event =>{
-      console.log('tabla eliminada')
+      console.log(event.detail.name)
       deleteTable(event.detail.name)
       loadData(null)
       
@@ -106,11 +108,14 @@
 
 
 async function deleteTable(name){
+  
+  const res = await fetch(`http://localhost:3000/tables?name=${name}`)
+  const table = await res.json()
+  const [{id}] = table
+  
   const deleteURLs = [
-    fetch(`http://localhost:3000/tables/${name}`),
-    fetch(`http://localhost:3000/lists?tableId=${name}`),
-    fetch(`http://localhost:3000/cards?tableId=${name}`)
-
+    fetch(`http://localhost:3000/lists?tableId=${id}`),
+    fetch(`http://localhost:3000/cards?tableId=${id}`)
   ]
   
   const getData = await Promise.all(deleteURLs)
@@ -118,18 +123,14 @@ async function deleteTable(name){
   console.log(dataJSON)
 
   for(let i=0; i<dataJSON.length;i++){
-     if(i === 0){
-        fetch(`http://localhost:3000/tables/${name}`,{
-          method:'DELETE'
-        })
-     }else if(i === 1){
-       for(const list of dataJSON[1]){
+   if(i === 0){
+       for(const list of dataJSON[0]){
         fetch(`http://localhost:3000/lists/${list.id}`,{
             method:'DELETE'
           })
        }
      }else {
-        for(const card of dataJSON[2]){
+        for(const card of dataJSON[1]){
           fetch(`http://localhost:3000/cards/${card.id}`,{
             method:'DELETE'
           })
@@ -137,5 +138,6 @@ async function deleteTable(name){
      }
       
   }
+  await fetch(`http://localhost:3000/tables/${id}`,{method:'DELETE'})
 
 }

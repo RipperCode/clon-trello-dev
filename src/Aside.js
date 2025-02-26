@@ -156,7 +156,7 @@ export default class asideComponent extends HTMLElement{
 				const name = event.target.parentNode.textContent
 				const top = event.target.getBoundingClientRect().top
 				const left = event.target.getBoundingClientRect().left
-				console.log(top)
+				
 				const optionsTable = new OptionsTable(name, top, left)
 
 				this.appendChild(optionsTable)
@@ -164,6 +164,32 @@ export default class asideComponent extends HTMLElement{
 			}
 
 		}
+		if(event.type === "send:tableInfo"){
+			const name = event.detail.name
+  			this.addTable(name)
+  			this.createTable(event.detail.name, event.detail.color)
+		}
+		if(event.type === "edit:table"){
+			
+			const sidenewtable = this.children[0]
+			console.log('name pasado desde options table a aside: ', event.detail.name)
+  			sidenewtable.editTable(event.detail.name)
+  			
+		}
+		if(event.type === "update:table"){
+			
+			const asideElement = this.shadowRoot.querySelector(`div[table="${event.detail.oldName}"`)
+			asideElement.children[0].textContent = event.detail.name
+			asideElement.setAttribute('table', event.detail.name)
+			console.log('name old name no se modifican son los anteriores valores')
+			this.editTable(event.detail.name, event.detail.oldName, event.detail.color)
+		}
+		if(event.type === "delete:table"){
+			console.log(event.detail.name)
+			const toDeleted = this.shadowRoot.querySelector(`div[table="${event.detail.name}"]`)
+  			toDeleted.remove()
+		}
+
 	}
 	//propiedades observables
 	static get observedAttributes(){
@@ -183,22 +209,16 @@ export default class asideComponent extends HTMLElement{
   		addbutton.addEventListener('click', ()=>{
   			const sidenewtable = this.children[0]
   			sidenewtable.setAttribute('isVisible', '')
+  			sidenewtable.createTable()
   			
   		})
-  		this.addEventListener('send:tableInfo',(event)=>{
-  			const name = event.detail.name
-  			this.addTable(name)
-
-  			this.createTable(event.detail.name, event.detail.color)
-	  		
-  		})
-  		this.addEventListener('delete:table',(event)=>{
-  			const toDeleted = this.shadowRoot.querySelector(`div[table="${event.detail.name}"]`)
-  			toDeleted.remove()
-
-  		})
+  		this.addEventListener('send:tableInfo',this)
+  		this.addEventListener('delete:table',this)
   		this.shadowRoot.querySelector('main').addEventListener("click",this)
+  		this.parentNode.addEventListener('edit:table',this)
+  		this.addEventListener('update:table',this)
   		this.fetchData()
+
   	}
   	async fetchData(){
   		const res = await fetch('http://localhost:3000/tables')
@@ -211,7 +231,7 @@ export default class asideComponent extends HTMLElement{
     	this.data.forEach(table => {
 	        const tableItem = document.createElement('div');
 	        tableItem.classList.add('tableItems');
-	        tableItem.setAttribute('table', table.id)
+	        tableItem.setAttribute('table', table.name)
 	        const tableName = document.createElement('p');
 	        const points = document.createElement('img')
 	        points.src = '/clon-trello-app/icons/puntos-suspensivos.svg'
@@ -219,7 +239,7 @@ export default class asideComponent extends HTMLElement{
 	        const star = document.createElement('star-icon')
 	        
 
-	        tableName.textContent = table.id; // Asume que cada tabla tiene un campo 'name'
+	        tableName.textContent = table.name; // Asume que cada tabla tiene un campo 'name'
 	        tableItem.appendChild(tableName);
 	        tableItem.appendChild(points)
 	        tableItem.appendChild(star)
@@ -252,8 +272,25 @@ export default class asideComponent extends HTMLElement{
   		
   		this.dispatchEvent(this.createTableEvent)
   	}
-  	async eliminarTable(name){
+  	async editTable(name, oldName, color){
+  		const oldTable = await fetch(`http://localhost:3000/tables?name=${oldName}`)
+  		const [oldTableJSON] = await oldTable.json()
+  		console.log(oldTableJSON)
+  		if(name === oldTableJSON.name && color === oldTableJSON.color) return
   		
+
+  		await fetch(`http://localhost:3000/tables/${oldTableJSON.id}`,{
+  			method:'PATCH',
+  			headers:{"Content-Type":"application/json"},
+	  		body: JSON.stringify({name, color})
+  		})
+	
+  		const navigateTo = new CustomEvent('navigateTo:table',{
+  				detail:{name},
+  				bubbles:true,
+  				composed:true
+  				})
+  		this.dispatchEvent(navigateTo)
   	}
   	
 }

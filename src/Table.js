@@ -21,8 +21,8 @@ export default class Table extends HTMLElement{
            }
         }
         if(event.type === 'add:list'){
-            console.log('antes de agregar la lista', this.name)
-            const list = new List(event.detail.name, this.name)
+            
+            const list = new List(event.detail.name, this.tableId)
             this.addList(event.detail.name, this.name).then(()=>{
                 const main = this.shadowRoot.querySelector('.addList')
                 main.insertAdjacentElement('beforebegin', list)                
@@ -30,7 +30,11 @@ export default class Table extends HTMLElement{
             })
             
         }
-        
+        /*if(event.type === "update:table"){
+            this.name = event.detail.name
+            this.color = event.detail.color
+            this.table()
+        }*/
     }
     // Callback que se ejecuta cuando cambia una propiedad
     attributeChangedCallback(name, oldValue, newValue) {
@@ -44,9 +48,11 @@ export default class Table extends HTMLElement{
     setData(data, type){
         this.data = data
         this.type = type
-        this.name = data.id
+        this.name = data.name
+        this.color = data.color
+        this.tableId = data.id
         this.render()
-        console.log(this.data)
+        
     } 
 
     render(){
@@ -87,6 +93,7 @@ export default class Table extends HTMLElement{
             `
     }
     table(){
+        
         this.shadowRoot.innerHTML = `
             <style>
             *,
@@ -96,16 +103,20 @@ export default class Table extends HTMLElement{
                 padding: 0;
                 box-sizing: border-box;
             }
+            
             .container{
-                background-color: ${this.data.color};
-                min-width:100%;
-                min-height:94vh;
+                background-color: ${this.color};     
                 color:var(--text-300);
+                position:absolute;
+                overflow:auto;
+                min-height:100%;
+                min-width: 100%;
             }
             main{
                 display:flex;
                 gap:10px;
                 padding:10px;
+                height:100%;
                 .addList{
                     position:relative;
                     width:272px;
@@ -124,7 +135,7 @@ export default class Table extends HTMLElement{
             
             </style>
             <article class="container">
-                <table-header name=${this.name}></table-header>
+                <table-header name="${this.name}"></table-header>
                 <main>
                     ${this.data.lists.map(list => `
                         <list-component name="${list.name}" table="${list.tableId}"></list-component>`).join('')
@@ -140,6 +151,7 @@ export default class Table extends HTMLElement{
             this.shadowRoot.querySelector('.addList button')
                 .addEventListener('click',this)
             this.shadowRoot.addEventListener('add:list', this)
+            /*document.addEventListener('update:table',this)*/
             
     }
     notfound(){
@@ -166,10 +178,11 @@ export default class Table extends HTMLElement{
              </article>      
             `
     }
-    async addList(nameList, table){
+    async addList(name, table){
     
       try{
-        
+        const res = await fetch(`http://localhost:3000/tables?name=${table}`)
+        const [{id}] = await res.json()
         await fetch(`http://localhost:3000/lists`,{
           method:'POST',
           headers:{
@@ -177,8 +190,8 @@ export default class Table extends HTMLElement{
           },
           body: JSON.stringify(    
               {
-                name: nameList,
-                tableId: table
+                name,
+                tableId:id
               }
           )
         })
